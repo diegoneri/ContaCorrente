@@ -87,13 +87,8 @@ while (executando)
             break;
     }
 
-    if (executando)
-    {
-        Console.WriteLine();
-    }
+    Console.WriteLine();
 }
-
-return;
 
 void ExibirCabecalho()
 {
@@ -140,7 +135,7 @@ string LerTexto(string mensagem)
             return texto.Trim();
         }
 
-        Console.Write("Informe um valor válido: ");
+        Console.Write("Informe um texto não vazio: ");
     }
 }
 
@@ -151,8 +146,7 @@ decimal LerDecimal(string mensagem, decimal valorMinimo)
     while (true)
     {
         var entrada = Console.ReadLine();
-        if (decimal.TryParse(entrada, NumberStyles.Number, culturaBrasileira, out var valor) ||
-            decimal.TryParse(entrada, NumberStyles.Number, CultureInfo.InvariantCulture, out valor))
+        if (decimal.TryParse(entrada, NumberStyles.Number, culturaBrasileira, out var valor))
         {
             if (valor >= valorMinimo)
             {
@@ -160,7 +154,7 @@ decimal LerDecimal(string mensagem, decimal valorMinimo)
             }
         }
 
-        Console.Write("Informe um valor válido: ");
+        Console.Write($"Informe um valor numérico válido (mínimo: {valorMinimo.ToString("N2", culturaBrasileira)}): ");
     }
 }
 
@@ -174,7 +168,22 @@ sealed class ContaBancaria
 {
     public ContaBancaria(string nome, decimal saldoInicial, decimal limiteChequeEspecial)
     {
-        Nome = nome;
+        if (string.IsNullOrWhiteSpace(nome))
+        {
+            throw new ArgumentException("O nome do cliente deve ser informado.", nameof(nome));
+        }
+
+        if (saldoInicial < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(saldoInicial), "O depósito inicial não pode ser negativo.");
+        }
+
+        if (limiteChequeEspecial < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(limiteChequeEspecial), "O limite do cheque especial não pode ser negativo.");
+        }
+
+        Nome = nome.Trim();
         Saldo = saldoInicial;
         LimiteChequeEspecial = limiteChequeEspecial;
     }
@@ -187,11 +196,21 @@ sealed class ContaBancaria
 
     public void Depositar(decimal valor)
     {
+        if (valor <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(valor), "O valor do depósito deve ser positivo.");
+        }
+
         Saldo += valor;
     }
 
     public bool TentarSacar(decimal valor)
     {
+        if (valor <= 0)
+        {
+            return false;
+        }
+
         var saldoAposSaque = Saldo - valor;
         if (saldoAposSaque < -LimiteChequeEspecial)
         {
