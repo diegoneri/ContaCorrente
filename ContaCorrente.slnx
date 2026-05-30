@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ContaCorrente.csproj" />
+  <Project Path="ContaCorrente.Tests/ContaCorrente.Tests.csproj" />
+</Solution>
